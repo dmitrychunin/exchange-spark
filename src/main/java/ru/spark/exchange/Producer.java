@@ -19,7 +19,7 @@ public class Producer {
 
     public void send(KafkaTopic topic, String message) {
         String topicName = topic.getTopicName();
-        log.info("В топик {} отправляется сообщение {}", topicName, message);
+//        log.info("В топик {} отправляется сообщение {}", topicName, message);
         ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topicName, message);
         kafkaProducer.send(producerRecord);
         kafkaProducer.flush();

@@ -10,8 +10,11 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 public class Main {
-
+//todo кешировать результат в ConcurrentNavigableMap: ключ quantity (количество) и значение цена (последняя пришедшая)
+//todo ограничить размер фрейма, до этого запускать:-Dorg.asynchttpclient.webSocketMaxFrameSize=65536
     private static final Producer producer = new Producer();
+    private static WebSocket webSocket;
+
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
         WebSocketUpgradeHandler.Builder upgradeHandlerBuilder
@@ -22,6 +25,7 @@ public class Main {
                     public void onClose(WebSocket websocket, int code, String reason) {
                         // WebSocket connection closed
                         log.info("ws closed");
+                        websocket.sendPongFrame();
                     }
 
                     @Override
@@ -46,7 +50,7 @@ public class Main {
                     @Override
                     public void onPingFrame(byte[] payload) {
                         log.info("ping frame");
-//                        todo send pong to take on connection
+                        webSocket.sendPongFrame(payload);
                     }
 
                     @Override
@@ -68,10 +72,10 @@ public class Main {
                     }
                 }).build();
 
-            Dsl.asyncHttpClient()
-                    .prepareGet("wss://stream.binance.com:9443/ws")
-                    .setRequestTimeout(5000)
-                    .execute(wsHandler)
-                    .get();
+        webSocket = Dsl.asyncHttpClient()
+                .prepareGet("wss://stream.binance.com:9443/ws")
+                .setRequestTimeout(5000)
+                .execute(wsHandler)
+                .get();
     }
 }
