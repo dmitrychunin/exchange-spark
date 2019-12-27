@@ -1,23 +1,24 @@
-package ru.spark.exchange;
+package ru.spark.exchange.consume;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.asynchttpclient.Dsl;
 import org.asynchttpclient.ws.WebSocket;
 import org.asynchttpclient.ws.WebSocketListener;
 import org.asynchttpclient.ws.WebSocketUpgradeHandler;
 
-import java.util.concurrent.ExecutionException;
-
 @Slf4j
-public class Main {
-//todo кешировать результат в ConcurrentNavigableMap: ключ quantity (количество) и значение цена (последняя пришедшая)
+public class OrdersConsumer {
+    //todo кешировать результат в ConcurrentNavigableMap: ключ quantity (количество) и значение цена (последняя пришедшая)
 //todo ограничить размер фрейма, до этого запускать:-Dorg.asynchttpclient.webSocketMaxFrameSize=65536
+//todo в rest api есть request-weight, и бан за ддос, есть ли в ws-api аналогичный механизм?
     private static final Producer producer = new Producer();
     private static WebSocket webSocket;
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    @SneakyThrows
+    public static void start() {
 
-        WebSocketUpgradeHandler.Builder upgradeHandlerBuilder
+        var upgradeHandlerBuilder
                 = new WebSocketUpgradeHandler.Builder();
         WebSocketUpgradeHandler wsHandler = upgradeHandlerBuilder
                 .addWebSocketListener(new WebSocketListener() {
@@ -43,7 +44,7 @@ public class Main {
 
                     @Override
                     public void onTextFrame(String payload, boolean finalFragment, int rsv) {
-//                        todo отбрасывать первое сообщение типа {"result":null,"id":1}
+//                        todo отбрасывать первое сообщение типа {"result":null,"id":1} - ответ на stream-subscribing
                         producer.send(KafkaTopic.ORDER, payload);
                     }
 

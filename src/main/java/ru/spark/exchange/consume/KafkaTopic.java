@@ -1,4 +1,4 @@
-package ru.spark.exchange;
+package ru.spark.exchange.consume;
 
 
 public enum KafkaTopic {

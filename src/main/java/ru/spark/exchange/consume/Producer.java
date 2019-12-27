@@ -1,4 +1,4 @@
-package ru.spark.exchange;
+package ru.spark.exchange.consume;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
