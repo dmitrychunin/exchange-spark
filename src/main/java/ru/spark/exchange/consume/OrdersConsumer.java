@@ -40,12 +40,13 @@ public class OrdersConsumer {
                     @Override
                     public void onBinaryFrame(byte[] payload, boolean finalFragment, int rsv) {
                         log.info("binary frame {}", payload);
+                        producer.send(KafkaTopic.ORDER, payload);
                     }
 
                     @Override
                     public void onTextFrame(String payload, boolean finalFragment, int rsv) {
 //                        todo отбрасывать первое сообщение типа {"result":null,"id":1} - ответ на stream-subscribing
-                        producer.send(KafkaTopic.ORDER, payload);
+                        producer.send(KafkaTopic.ORDER, payload.getBytes());
                     }
 
                     @Override

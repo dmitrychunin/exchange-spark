@@ -12,9 +12,8 @@ public class QuartzTrigger {
         Trigger trigger = TriggerBuilder.newTrigger()
                 .withIdentity("sparkJob1Trigger", "sparkJobsGroup")
                 .withSchedule(
-                        CronScheduleBuilder.cronSchedule("* * * * * ?"))
+                        CronScheduleBuilder.cronSchedule("*/10 * * * * ?"))
                 .build();
-
 
         JobDetail sparkQuartzJob = JobBuilder.newJob(SparkLauncherQuartzJob.class)
                 .withIdentity("SparkLauncherQuartzJob", "sparkJobsGroup")
