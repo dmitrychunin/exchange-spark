@@ -10,9 +10,6 @@ import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaInputDStream;
 import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-import org.apache.spark.streaming.kafka010.ConsumerStrategies;
-import org.apache.spark.streaming.kafka010.KafkaUtils;
-import org.apache.spark.streaming.kafka010.LocationStrategies;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import ru.spark.exchange.consume.KafkaTopic;
@@ -25,8 +22,12 @@ public class SparkLauncherQuartzJob implements Job {
     @SneakyThrows
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
+//todo org.apache.spark.SparkException: Only one SparkContext may be running in this JVM (see SPARK-2243). To ignore this error, set spark.driver.allowMultipleContexts = true. (ошибка при запуске пайплайна в кроне)
+//todo
         log.info("execute job");
         SparkConf sparkConf = new SparkConf();
+//        todo ???
+        sparkConf.setMaster("local[2]");
         sparkConf.setAppName("ExchangeMonitoringApp");
 //        sparkConf.set("spark.cassandra.connection.host", "127.0.0.1");
 
