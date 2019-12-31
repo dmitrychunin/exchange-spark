@@ -22,6 +22,6 @@ public class Producer {
         val topicName = topic.getTopicName();
         val producerRecord = new ProducerRecord<>(topicName, message);
         kafkaProducer.send(producerRecord);
-        kafkaProducer.flush();
+//        kafkaProducer.flush();
     }
 }
