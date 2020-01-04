@@ -9,20 +9,20 @@ public class QuartzTrigger {
     @SneakyThrows
     public static void main(String[] args) {
         // trigger runs every second
-        Trigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity("sparkJob1Trigger", "sparkJobsGroup")
-                .withSchedule(
-                        CronScheduleBuilder.cronSchedule("*/10 * * * * ?"))
-                .build();
-
-        JobDetail sparkQuartzJob = JobBuilder.newJob(SparkLauncherQuartzJob.class)
-                .withIdentity("SparkLauncherQuartzJob", "sparkJobsGroup")
-                .build();
-
-        Scheduler scheduler = new StdSchedulerFactory().getScheduler();
-        scheduler.start();
-        scheduler.scheduleJob(sparkQuartzJob , trigger);
-
+//        Trigger trigger = TriggerBuilder.newTrigger()
+//                .withIdentity("sparkJob1Trigger", "sparkJobsGroup")
+//                .withSchedule(
+//                        CronScheduleBuilder.cronSchedule("*/10 * * * * ?"))
+//                .build();
+//
+//        JobDetail sparkQuartzJob = JobBuilder.newJob(SparkLauncherQuartzJob.class)
+//                .withIdentity("SparkLauncherQuartzJob", "sparkJobsGroup")
+//                .build();
+//
+//        Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+//        scheduler.start();
+//        scheduler.scheduleJob(sparkQuartzJob , trigger);
+        SparkLauncherQuartzJob.execute();
         OrdersConsumer.start();
     }
 }

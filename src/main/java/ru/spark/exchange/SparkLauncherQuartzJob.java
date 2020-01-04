@@ -23,7 +23,7 @@ import ru.spark.exchange.consume.KafkaTopic;
 import java.util.*;
 
 @Slf4j
-public class SparkLauncherQuartzJob implements Job {
+public class SparkLauncherQuartzJob {//implements Job {
     private static SparkSession sparkSession;
     private static JavaStreamingContext streamingContext;
 
@@ -31,7 +31,7 @@ public class SparkLauncherQuartzJob implements Job {
         SparkConf sparkConf = new SparkConf();
         sparkConf.setMaster("local[2]");
         sparkConf.setAppName("ExchangeMonitoringApp");
-        JavaSparkContext sc  = new JavaSparkContext(sparkConf);
+        JavaSparkContext sc = new JavaSparkContext(sparkConf);
         streamingContext = new JavaStreamingContext(sc, Durations.seconds(1));
         sparkSession = SparkSession.builder()
                 .config(sparkConf)
@@ -40,9 +40,9 @@ public class SparkLauncherQuartzJob implements Job {
     }
 
     @SneakyThrows
-    @Override
-    public void execute(JobExecutionContext jobExecutionContext) {
-        log.info("execute job");
+//    @Override
+    public static void execute(/*JobExecutionContext jobExecutionContext*/) {
+        log.error("execute job");
 
         Map<String, String> kafkaParams = new HashMap<>();
         kafkaParams.put("bootstrap.servers", "localhost:9092");
@@ -62,39 +62,25 @@ public class SparkLauncherQuartzJob implements Job {
 //todo количество bids, asks, bids/asks
         messages.print();
         JavaDStream<String> map = messages.map(t -> t._2);
-        map.print();
-//        map
-//                .foreachRDD((VoidFunction<JavaRDD<String>>) rdd -> {
-//                    JavaRDD<Row> rowRDD = rdd.map(RowFactory::create);
-//
-//                    StructType schema = DataTypes.createStructType(new StructField[]{
-//                            DataTypes.createStructField("e", DataTypes.StringType, false),
-//                            DataTypes.createStructField("E", DataTypes.LongType, false),
-//                            DataTypes.createStructField("s", DataTypes.StringType, false),
-//                            DataTypes.createStructField("U", DataTypes.LongType, false),
-//                            DataTypes.createStructField("u", DataTypes.LongType, false)//,
-//                            DataTypes.createStructField("b", DataTypes.createArrayType(
-//                                    DataTypes.createArrayType(
-//                                            DataTypes.StringType, false
-//                                    ),
-//                                    false),
-//                                    false),
-//                            DataTypes.createStructField("a", DataTypes.createArrayType(
-//                                    DataTypes.createArrayType(
-//                                            DataTypes.StringType, false
-//                                    ),
-//                                    false),
-//                                    false)
-//
-//                    });
-//
-//                    Dataset<Row> df = sparkSession.createDataFrame(rowRDD, schema);
+//        map.print();
+        map
+                .foreachRDD((VoidFunction<JavaRDD<String>>) rdd -> {
+
+                    Dataset<Row> df = sparkSession.read().json(rdd);
 //                    df.show();
-//                    List<Row> b = df.select(functions.size(new Column("b"))).collectAsList();
-//                    log.info("rowlist: {}", b);
-//                    int countOfBids = b.get(0).getInt(0);
-//
-//                });
+//                    df.printSchema();
+
+                    List<Row> b = df.select(functions.size(new Column("b")).as("bids_count")).collectAsList();
+
+                    log.error("rowlist: {}", b.size());
+                    int allBidsCount = 0;
+                    for (Row row : b) {
+                        int countOfBids = row.getAs("bids_count");
+                        log.error("count: {}", countOfBids);
+                        allBidsCount += countOfBids;
+                    }
+                    log.error("all count: {}", allBidsCount);
+                });
         streamingContext.start();
     }
 }
