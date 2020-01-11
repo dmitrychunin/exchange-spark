@@ -70,16 +70,25 @@ public class SparkLauncherQuartzJob {//implements Job {
 //                    df.show();
 //                    df.printSchema();
 
-                    List<Row> b = df.select(functions.size(new Column("b")).as("bids_count")).collectAsList();
+                    List<Row> b = df.select(
+                            functions.size(new Column("b")).as("bids_count"),
+                            functions.size(new Column("a")).as("asks_count")
+                    ).collectAsList();
 
                     log.error("rowlist: {}", b.size());
                     int allBidsCount = 0;
+                    int allAsksCount = 0;
                     for (Row row : b) {
                         int countOfBids = row.getAs("bids_count");
-                        log.error("count: {}", countOfBids);
+                        int countOfAsks = row.getAs("asks_count");
+                        log.error("count of bids: {}", countOfBids);
+                        log.error("count of asks: {}", countOfAsks);
                         allBidsCount += countOfBids;
+                        allAsksCount += countOfAsks;
                     }
-                    log.error("all count: {}", allBidsCount);
+                    log.error("all count of bids: {}", allBidsCount);
+                    log.error("all count of asks: {}", allAsksCount);
+                    log.error("bids/asks: {}", allBidsCount/allAsksCount);
                 });
         streamingContext.start();
     }
