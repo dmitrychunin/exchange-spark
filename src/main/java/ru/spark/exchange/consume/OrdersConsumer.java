@@ -13,7 +13,7 @@ public class OrdersConsumer {
     //todo кешировать результат в ConcurrentNavigableMap: ключ quantity (количество) и значение цена (последняя пришедшая)
 //todo ограничить размер фрейма, до этого запускать:-Dorg.asynchttpclient.webSocketMaxFrameSize=65536
 //todo в rest api есть request-weight, и бан за ддос, есть ли в ws-api аналогичный механизм?
-    private static final Producer producer = new Producer();
+    private static final KafkaWrapperProducer kafkaProducer = new KafkaWrapperProducer();
     private static WebSocket webSocket;
 
     @SneakyThrows
@@ -35,19 +35,23 @@ public class OrdersConsumer {
                         // WebSocket connection error
                         log.info("ws error");
                         t.printStackTrace();
+                        OrdersConsumer.start();
                     }
 
 
                     @Override
                     public void onBinaryFrame(byte[] payload, boolean finalFragment, int rsv) {
                         log.info("binary frame {}", payload);
-                        producer.send(KafkaTopic.ORDER, payload);
+                        kafkaProducer.sendByte(KafkaTopic.ORDER, payload);
                     }
 
                     @Override
                     public void onTextFrame(String payload, boolean finalFragment, int rsv) {
 //                        todo отбрасывать первое сообщение типа {"result":null,"id":1} - ответ на stream-subscribing
-                        producer.send(KafkaTopic.ORDER, payload.getBytes());
+                        if (payload.contains("result")) {
+                            return;
+                        }
+                        kafkaProducer.sendString(KafkaTopic.ORDER, payload);
                     }
 
                     @Override
@@ -69,6 +73,17 @@ public class OrdersConsumer {
                                 "  \"method\": \"SUBSCRIBE\",\n" +
                                 "  \"params\": [\n" +
                                 "    \"btcusdt@depth\"\n" +
+//                                "    \"btcusdt@aggTrade\",\n" +
+//                                "    \"ethusdt@depth\",\n" +
+//                                "    \"ethusdt@aggTrade\",\n" +
+//                                "    \"bnbusdt@depth\",\n" +
+//                                "    \"bnbusdt@aggTrade\",\n" +
+//                                "    \"xrpusdt@depth\",\n" +
+//                                "    \"xrpusdt@aggTrade\",\n" +
+//                                "    \"bchusdt@depth\",\n" +
+//                                "    \"bchusdt@aggTrade\",\n" +
+//                                "    \"ltcusdt@depth\",\n" +
+//                                "    \"ltcusdt@aggTrade\"\n" +
                                 "  ],\n" +
                                 "  \"id\": 1\n" +
                                 "}");

@@ -2,7 +2,7 @@ package ru.spark.exchange.consume;
 
 
 public enum KafkaTopic {
-    ORDER("order");
+    ORDER("order_string3");
     private final String topicName;
 
     KafkaTopic(String topicName) {
